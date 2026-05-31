@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>☕ Cafe Tech Notes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Noto+Serif+JP:wght@300;400;600&family=Source+Code+Pro:wght@400;500&family=IM+Fell+English:ital@1&display=swap" rel="stylesheet" />
+
+  <style>
+    /* =============================================
+       🎨 THEME SETTINGS — ここだけ変えればOK
+       ============================================= */
+    :root {
+      --bg:           #f7f2ea;   /* 背景色（クリーム） */
+      --bg-card:      #fdfaf5;   /* カード背景 */
+      --bg-header:    #2c1f14;   /* ヘッダー背景（深煎り） */
+      --accent:       #8b4513;   /* アクセント（コーヒーブラウン） */
+      --accent-light: #c8956c;   /* サブアクセント（ミルクコーヒー） */
+      --text:         #2c1f14;   /* 本文 */
+      --text-muted:   #7a6555;   /* サブテキスト */
+      --border:       #d9c9b0;   /* ボーダー */
+      --border-dark:  #b8a08a;   /* 強めのボーダー */
+    }
+
+    /* =============================================
+       📋 カテゴリ & 記事データ
+       ============================================= */
+    /* カテゴリ・記事の追加は下の <main> 内の HTML を編集するだけでOK。
+       構造:
+         <section class="category" data-icon="☕">
+           <h2 class="category-title">カテゴリ名</h2>
+           <ul class="article-list">
+             <li><a href="URL">記事タイトル</a> <span class="tag">任意タグ</span></li>
+           </ul>
+         </section>
+    */
+
+    /* =============================================
+       🔧 BASE RESET
+       ============================================= */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; scroll-behavior: smooth; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Noto Serif JP', Georgia, serif;
+      line-height: 1.8;
+      background-image:
+        radial-gradient(circle at 20% 50%, rgba(139,69,19,0.04) 0%, transparent 60%),
+        radial-gradient(circle at 80% 20%, rgba(200,149,108,0.05) 0%, transparent 50%),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Ccircle cx='30' cy='30' r='0.8' fill='%23b8a08a' fill-opacity='0.3'/%3E%3C/svg%3E");
+    }
+
+    /* =============================================
+       ☕ HEADER
+       ============================================= */
+    header {
+      background: var(--bg-header);
+      color: #f7f2ea;
+      padding: 3rem 2rem 2.5rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    header::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        -45deg,
+        transparent,
+        transparent 8px,
+        rgba(255,255,255,0.015) 8px,
+        rgba(255,255,255,0.015) 9px
+      );
+      pointer-events: none;
+    }
+
+    .header-eyebrow {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 0.85rem;
+      color: var(--accent-light);
+      letter-spacing: 0.15em;
+      margin-bottom: 0.75rem;
+      opacity: 0.9;
+    }
+
+    .site-title {
+      font-family: 'Playfair Display', 'Noto Serif JP', serif;
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      line-height: 1.2;
+      color: #f7f2ea;
+    }
+
+    .site-title .coffee-icon {
+      display: inline-block;
+      margin-right: 0.3em;
+      animation: steam 3s ease-in-out infinite;
+    }
+
+    @keyframes steam {
+      0%, 100% { transform: translateY(0) rotate(-2deg); }
+      50%       { transform: translateY(-4px) rotate(2deg); }
+    }
+
+    .site-subtitle {
+      font-family: 'Noto Serif JP', serif;
+      font-size: 0.9rem;
+      color: #c8ab8a;
+      margin-top: 0.75rem;
+      font-weight: 300;
+      letter-spacing: 0.05em;
+    }
+
+    .header-divider {
+      width: 80px;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--accent-light), transparent);
+      margin: 1.5rem auto 0;
+    }
+
+    /* =============================================
+       📌 MENU NAV (目次ナビ)
+       ============================================= */
+    .menu-nav {
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      padding: 0.75rem 1.5rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1.2rem;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(44,31,20,0.08);
+    }
+
+    .menu-nav a {
+      font-family: 'Source Code Pro', monospace;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      letter-spacing: 0.03em;
+      padding: 0.2rem 0.1rem;
+      border-bottom: 1px solid transparent;
+      transition: color 0.2s, border-color 0.2s;
+    }
+
+    .menu-nav a:hover {
+      color: var(--accent);
+      border-bottom-color: var(--accent-light);
+    }
+
+    /* =============================================
+       📦 LAYOUT
+       ============================================= */
+    main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 5rem;
+    }
+
+    .intro-text {
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-family: 'Noto Serif JP', serif;
+      font-weight: 300;
+      margin-bottom: 3rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid var(--border);
+      font-style: italic;
+    }
+
+    /* =============================================
+       📂 CATEGORY SECTION
+       ============================================= */
+    .category {
+      margin-bottom: 2.8rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+      box-shadow: 2px 3px 12px rgba(44,31,20,0.06);
+      transition: box-shadow 0.25s;
+    }
+
+    .category:hover {
+      box-shadow: 3px 5px 18px rgba(44,31,20,0.1);
+    }
+
+    .category-header {
+      background: var(--accent);
+      padding: 0.85rem 1.4rem;
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+    }
+
+    .category-icon {
+      font-size: 1.15rem;
+      line-height: 1;
+    }
+
+    .category-title {
+      font-family: 'Playfair Display', 'Noto Serif JP', serif;
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #f7f2ea;
+      letter-spacing: 0.03em;
+    }
+
+    .category-desc {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 0.78rem;
+      color: rgba(247,242,234,0.7);
+      margin-left: auto;
+      white-space: nowrap;
+    }
+
+    /* =============================================
+       📰 ARTICLE LIST
+       ============================================= */
+    .article-list {
+      list-style: none;
+      padding: 0.4rem 0;
+    }
+
+    .article-list li {
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.65rem 1.4rem;
+      transition: background 0.15s;
+    }
+
+    .article-list li:last-child {
+      border-bottom: none;
+    }
+
+    .article-list li:hover {
+      background: rgba(139,69,19,0.04);
+    }
+
+    .article-list li::before {
+      content: '—';
+      color: var(--accent-light);
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+
+    .article-list a {
+      color: var(--text);
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 400;
+      flex: 1;
+      transition: color 0.2s;
+    }
+
+    .article-list a:hover {
+      color: var(--accent);
+    }
+
+    .article-list a::after {
+      content: ' ↗';
+      font-size: 0.75rem;
+      color: var(--accent-light);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .article-list li:hover a::after {
+      opacity: 1;
+    }
+
+    /* タグ */
+    .tag {
+      font-family: 'Source Code Pro', monospace;
+      font-size: 0.68rem;
+      padding: 0.15rem 0.5rem;
+      border: 1px solid var(--border-dark);
+      color: var(--text-muted);
+      border-radius: 2px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .tag.new {
+      border-color: var(--accent-light);
+      color: var(--accent);
+      background: rgba(139,69,19,0.06);
+    }
+
+    /* =============================================
+       🦶 FOOTER
+       ============================================= */
+    footer {
+      background: var(--bg-header);
+      color: #c8ab8a;
+      text-align: center;
+      padding: 2rem;
+      font-size: 0.8rem;
+      font-family: 'Source Code Pro', monospace;
+      letter-spacing: 0.08em;
+    }
+
+    footer a {
+      color: var(--accent-light);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* =============================================
+       📱 RESPONSIVE
+       ============================================= */
+    @media (max-width: 600px) {
+      header { padding: 2rem 1.2rem 1.8rem; }
+      main    { padding: 2rem 1rem 4rem; }
+      .category-desc { display: none; }
+      .menu-nav { gap: 0.4rem 0.9rem; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ===== HEADER ===== -->
+  <header>
+    <p class="header-eyebrow">— a quiet corner of the internet —</p>
+    <h1 class="site-title">
+      <span class="coffee-icon">☕</span>Cafe Tech Notes
+    </h1>
+    <p class="site-subtitle">技術の記録と、ちょっとした雑感</p>
+    <div class="header-divider"></div>
+  </header>
+
+  <!-- ===== STICKY NAV ===== -->
+  <!--
+    ✏️ カテゴリを追加したら、ここにも同じIDでリンクを追加する
+       id は category セクションの id 属性と対応している
+  -->
+  <nav class="menu-nav" aria-label="カテゴリナビ">
+    <a href="#cloud">Cloud</a>
+    <a href="#kubernetes">Kubernetes</a>
+    <a href="#cicd">CI/CD & GitOps</a>
+    <a href="#observability">Observability</a>
+    <a href="#security">Security</a>
+    <a href="#linux">Linux & Networking</a>
+    <a href="#career">Career Notes</a>
+    <a href="#essays">Essays</a>
+  </nav>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main>
+
+    <p class="intro-text">
+      Zenn に書いた記事をカテゴリ別にまとめています。<br>
+      コーヒーでも飲みながら、ゆっくりどうぞ。
+    </p>
+
+    <!--
+    ╔══════════════════════════════════════════════════════════╗
+    ║  ✏️ 記事の追加・編集はここから下を編集するだけでOK      ║
+    ║                                                          ║
+    ║  1. <section class="category" id="xxx">  ← IDを設定    ║
+    ║  2. data-icon="絵文字"  ← カテゴリアイコン              ║
+    ║  3. <li><a href="URL">タイトル</a></li>  ← 記事追加     ║
+    ║  4. 任意で <span class="tag">ラベル</span> を付ける     ║
+    ║     new クラスを付けると強調: class="tag new"           ║
+    ╚══════════════════════════════════════════════════════════╝
+    -->
+
+    <!-- ☁️ Cloud -->
+    <section class="category" id="cloud">
+      <div class="category-header">
+        <span class="category-icon">☁️</span>
+        <h2 class="category-title">Cloud</h2>
+        <span class="category-desc">AWS / GCP / Azure</span>
+      </div>
+      <ul class="article-list">
+      </ul>
+    </section>
+
+    <!-- ⚙️ Kubernetes -->
+    <section class="category" id="kubernetes">
+      <div class="category-header">
+        <span class="category-icon">⚙️</span>
+        <h2 class="category-title">Kubernetes</h2>
+        <span class="category-desc">k8s / Helm / Operators</span>
+      </div>
+      <ul class="article-list">
+        <li>
+          <a href="#">kindが便利ってだけ</a>
+        </li>
+      </ul>
+    </section>
+
+    <!-- 🔄 CI/CD & GitOps -->
+    <section class="category" id="cicd">
+      <div class="category-header">
+        <span class="category-icon">🔄</span>
+        <h2 class="category-title">CI/CD &amp; GitOps</h2>
+        <span class="category-desc">ArgoCD / GitHub Actions / Flux</span>
+      </div>
+      <ul class="article-list">
+        <li>
+          <a href="#">ArgoCD ApplicationSet で大量サービスのデプロイを管理する</a>
+        </li>
+      </ul>
+    </section>
+
+    <!-- 📊 Observability -->
+    <section class="category" id="observability">
+      <div class="category-header">
+        <span class="category-icon">📊</span>
+        <h2 class="category-title">Observability</h2>
+        <span class="category-desc">Prometheus / Grafana / OpenTelemetry</span>
+      </div>
+      <ul class="article-list">
+      </ul>
+    </section>
+
+    <!-- 🔐 Security -->
+    <section class="category" id="security">
+      <div class="category-header">
+        <span class="category-icon">🔐</span>
+        <h2 class="category-title">Security</h2>
+        <span class="category-desc">Zero Trust / RBAC / Secrets</span>
+      </div>
+      <ul class="article-list">
+      </ul>
+    </section>
+
+    <!-- 🐧 Linux & Networking -->
+    <section class="category" id="linux">
+      <div class="category-header">
+        <span class="category-icon">🐧</span>
+        <h2 class="category-title">Linux &amp; Networking</h2>
+        <span class="category-desc">kernel / eBPF / CNI</span>
+      </div>
+      <ul class="article-list">
+        <li>
+          <a href="#">eBPF で Kubernetes のネットワークトラブルを調査する</a>
+        </li>
+        <li>
+          <a href="#">Cilium の NetworkPolicy 設計入門</a>
+          <span class="tag">CNI</span>
+        </li>
+        <li>
+          <a href="#">tcpdump と Wireshark で k8s ポッド間通信を追う</a>
+        </li>
+      </ul>
+    </section>
+
+    <!-- 📝 徒然草 -->
+    <section class="category" id="essays">
+      <div class="category-header">
+        <span class="category-icon">✒️</span>
+        <h2 class="category-title">Essays</h2>
+        <span class="category-desc">技術と関係ない雑記</span>
+      </div>
+      <ul class="article-list">
+        <li>
+          <a href="#">自宅デスク環境 2024 年版</a>
+          <span class="tag">雑記</span>
+        </li>
+        <li>
+          <a href="#">コーヒー豆の焙煎度と技術記事の関係性（仮説）</a>
+        </li>
+        <li>
+          <a href="#">ターミナルをカスタマイズしすぎた結果</a>
+        </li>
+      </ul>
+    </section>
+
+    <!--
+    ✏️ 新しいカテゴリを追加するには、上のブロックをコピーして
+       id・category-icon・category-title・category-desc を変える。
+       nav の menu-nav にも <a href="#new-id">名前</a> を追加する。
+    -->
+
+  </main>
+
+  <!-- ===== FOOTER ===== -->
+  <footer>
+    <p>☕ Cafe Tech Notes &nbsp;·&nbsp; <a href="https://zenn.dev" target="_blank" rel="noopener">Zenn</a> &nbsp;·&nbsp; <a href="https://github.com" target="_blank" rel="noopener">GitHub</a></p>
+    <p style="margin-top:0.5rem; opacity:0.6;">brewed with curiosity &amp; caffeine</p>
+  </footer>
+
+</body>
+</html>
